@@ -1,12 +1,12 @@
 import '../../compiler/compilable.dart';
-import '../../compiler/compiled_result.dart';
+import '../../compiler/compiled_query.dart';
 import '../../compiler/compiler.dart';
 import '../../specs/drop_schema.dart';
 import '../builder.dart';
 import '../spec_source.dart';
 
 class DropSchemaBuilder<DB>
-    implements SpecSource<DropSchema>, Builder<DB>, Compilable<DB> {
+    implements SpecSource<DropSchema>, Builder<DB>, Compilable {
   final DropSchema _spec;
   final Compiler<DB> _compiler;
 
@@ -40,5 +40,5 @@ class DropSchemaBuilder<DB>
       );
 
   @override
-  CompiledResult<DB> compile() => _compiler.compile(toSpec());
+  CompiledQuery compile() => _compiler.compile(_spec);
 }

@@ -1,5 +1,5 @@
-import 'compiled_result.dart';
+import 'compiled_query.dart';
 
 abstract interface class Compilable<T> {
-  CompiledResult<T> compile();
+  CompiledQuery<T> compile();
 }

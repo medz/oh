@@ -1,11 +1,11 @@
 import '../specs/spec.dart';
 
-class CompiledResult<Database> {
+class CompiledQuery<T> {
   final Spec spec;
   final String sql;
   final Iterable<Object> params;
 
-  const CompiledResult({
+  const CompiledQuery({
     required this.spec,
     required this.sql,
     this.params = const [],
