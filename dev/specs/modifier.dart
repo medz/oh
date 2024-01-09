@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 
 enum ModifierLocation {
@@ -20,4 +21,9 @@ class Modifier implements Spec {
     required this.spec,
     required this.location,
   });
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) {
+    return visitor.visitModifier(this, context);
+  }
 }

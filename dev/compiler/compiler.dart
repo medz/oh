@@ -1,16 +1,21 @@
+import '../dialect/dialect.dart';
 import '../specs/spec.dart';
+import 'compiled_result.dart';
 
-abstract interface class Compiler<Database>
-    implements Comparable<CompiledResult<Database>> {}
+class Compiler<DB> {
+  final Dialect dialect;
 
-class CompiledResult<Database> {
-  final Spec spec;
-  final String sql;
-  final Iterable<Object> params;
+  const Compiler({required this.dialect});
 
-  const CompiledResult({
-    required this.spec,
-    required this.sql,
-    this.params = const [],
-  });
+  /// Compiles a spec into a compiled result.
+  CompiledResult<DB> compile<T extends Spec>(covariant T spec) {
+    final buffer = StringBuffer();
+    final params = <Object>[];
+
+    final visitor = _CompilerVisitor<DB>(dialect, buffer, params);
+    spec.accept(visitor);
+
+    return CompiledResult<DB>(
+        spec: spec, sql: buffer.toString(), params: params);
+  }
 }

@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'constraint.dart';
 import 'identifier.dart';
 import 'references.dart';
@@ -16,4 +17,9 @@ class ForeignKeyConstraint implements Constraint {
     this.onDelete,
     this.onUpdate,
   });
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) {
+    return visitor.visitForeignKeyConstraint(this, context);
+  }
 }

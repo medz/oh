@@ -1,3 +1,5 @@
+import 'compiled_result.dart';
+
 abstract interface class Compilable<T> {
-  T compile();
+  CompiledResult<T> compile();
 }

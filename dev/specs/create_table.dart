@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 import 'column_def.dart';
 import 'constraint.dart';
@@ -52,4 +53,8 @@ class CreateTable implements RootSpec {
     this.asSelectFrom,
     this.modifiers = const [],
   });
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) =>
+      visitor.visitCreateTable(this, context);
 }

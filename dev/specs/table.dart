@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 import 'identifier.dart';
 
@@ -11,4 +12,9 @@ class Table implements Spec {
 
   /// Creates a table specification.
   const Table(this.name, [this.schema]);
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) {
+    return visitor.visitTable(this, context);
+  }
 }

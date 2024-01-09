@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 
 class Generated implements Spec {
@@ -24,4 +25,9 @@ class Generated implements Spec {
     this.stored = false,
     this.expression,
   });
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) {
+    return visitor.visitGenerated(this, context);
+  }
 }

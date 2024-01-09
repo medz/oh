@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 import 'identifier.dart';
 
@@ -20,4 +21,8 @@ class DropSchema implements RootSpec {
 
   /// Creates a new `DROP SCHEMA` specification.
   const DropSchema(this.name, {this.ifExists = false, this.cascade = false});
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) =>
+      visitor.visitDropSchema(this, context);
 }

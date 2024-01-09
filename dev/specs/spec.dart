@@ -1,7 +1,12 @@
+import '../visitors/visitor.dart';
+
 /// SQL specification.
 ///
 /// All specifications are immutable.
-abstract class Spec {}
+abstract class Spec {
+  /// Accepts a visitor.
+  T accept<T>(SpecVisitor<T> visitor, [T? context]);
+}
 
 /// Root specification for SQL.
 ///

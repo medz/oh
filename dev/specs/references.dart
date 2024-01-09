@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 import 'identifier.dart';
 import 'table.dart';
@@ -40,4 +41,9 @@ class References implements Spec {
     this.onDelete,
     this.onUpdate,
   });
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) {
+    return visitor.visitReferences(this, context);
+  }
 }

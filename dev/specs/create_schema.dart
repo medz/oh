@@ -1,3 +1,4 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 import 'identifier.dart';
 
@@ -17,4 +18,8 @@ class CreateSchema implements RootSpec {
 
   /// Creates a new `CREATE SCHEMA` specification.
   const CreateSchema(this.name, {this.ifNotExists = false});
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) =>
+      visitor.visitCreateSchema(this, context);
 }

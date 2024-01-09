@@ -1,6 +1,7 @@
+import '../visitors/visitor.dart';
 import 'spec.dart';
 import 'check_constraint.dart';
-import 'default.dart';
+import 'default_value.dart';
 import 'generated.dart';
 import 'identifier.dart';
 import 'modifier.dart';
@@ -30,7 +31,7 @@ class ColumnDef implements Spec {
   final bool notNull;
 
   /// The column default value specification.
-  final Default? default$;
+  final DefaultValue? defaultValue;
 
   /// The column check constraint specification.
   final CheckConstraint? check;
@@ -56,11 +57,15 @@ class ColumnDef implements Spec {
     this.autoIncrement = false,
     this.unique = false,
     this.notNull = false,
-    this.default$,
+    this.defaultValue,
     this.check,
     this.generated,
     this.unsigned = false,
     this.nullsNotDistinct = false,
     this.modifiers = const [],
   });
+
+  @override
+  T accept<T>(SpecVisitor<T> visitor, [T? context]) =>
+      visitor.visitColumnDef(this, context);
 }
