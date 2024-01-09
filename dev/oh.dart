@@ -1,1 +1,3 @@
-class Oh<Database> {}
+class Oh<T> {
+  const Oh();
+}
