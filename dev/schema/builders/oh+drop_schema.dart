@@ -71,7 +71,7 @@ class _DropSchemaBuilder implements DropSchemaBuilder {
   DropSchemaSpec toSpec() => spec;
 
   @override
-  CompiledQuery<void> compile() => executor.compile(spec, identifier);
+  CompiledQuery<void> compile() => executor.compile(spec);
 
   @override
   Future<QueryResult<void>> execute() {

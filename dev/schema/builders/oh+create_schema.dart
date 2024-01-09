@@ -71,7 +71,7 @@ class _CreateSchemaBuilder implements CreateSchemaBuilder {
   CreateSchemaSpec toSpec() => spec;
 
   @override
-  CompiledQuery<void> compile() => executor.compile(spec, identifier);
+  CompiledQuery<void> compile() => executor.compile(spec);
 
   @override
   Future<QueryResult<void>> execute() =>
