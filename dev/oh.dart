@@ -1,54 +1,101 @@
+import 'dart:async';
+
+import 'dialect/database_introspector.dart';
 import 'dialect/dialect.dart';
 import 'driver/connection_provider.dart';
-import 'driver/database_connection.dart';
 import 'driver/driver.dart';
-import 'query_compiler/compiled_query.dart';
+import 'query_creator.dart';
 import 'query_executor/query_executor.dart';
-import 'query_executor/query_identifier.dart';
-import 'specs/statement_spec.dart';
+import 'schema/schema.dart';
+import 'specs/with_spec.dart';
 
-abstract interface class Oh<DB> implements QueryExecutor<DB> {
-  /// Creates a new oh instance.
-  factory Oh({required Dialect<DB> dialect}) = _Impl<DB>;
-}
+class Oh<DB> extends QueryCreator<DB> {
+  final Dialect<DB> _dialect;
+  final QueryExecutor<DB> _executor;
+  final WithSpec? _withSpec;
+  final Driver _driver;
 
-class _Impl<DB> implements Oh<DB> {
-  final Dialect<DB> dialect;
-  late final Driver driver;
-  late final QueryExecutor<DB> executor;
+  const Oh._(
+      {required QueryExecutor<DB> executor,
+      required Dialect<DB> dialect,
+      WithSpec? withSpec,
+      required Driver driver})
+      : _executor = executor,
+        _dialect = dialect,
+        _withSpec = withSpec,
+        _driver = driver,
+        super(executor: executor, withSpec: withSpec);
 
-  _Impl({required this.dialect}) {
-    driver = dialect.createDriver();
-    executor = QueryExecutor(
+  factory Oh({Dialect<DB>? dialect}) {
+    dialect ??= Dialect();
+
+    final driver = dialect.createDriver();
+    final executor = QueryExecutor<DB>(
       compiler: dialect.createQueryCompiler(),
       adapter: dialect.createAdapter(),
       connectionProvider: ConnectionProvider(driver),
     );
+
+    return Oh._(
+      executor: executor,
+      dialect: dialect,
+      driver: driver,
+    );
   }
 
-  @override
-  CompiledQuery<T> compile<T>(StatementSpec statement) {
-    return executor.compile(statement);
+  /// Current oh is transaction.
+  bool get isTransaction => false;
+
+  /// Returns a database introspector.
+  DatabaseIntrospector get introspector => _dialect.createIntrospector(this);
+
+  /// Returns the oh schema.
+  Schema<DB> get schema => Schema(_executor);
+
+  /// Returns value in interactive transaction.
+  Future<T> transaction<T>(
+    Future<T> Function(Oh<DB> transaction) execute, {
+    IsolationLevel? isolationLevel,
+  }) async {
+    if (isTransaction) {
+      throw Exception('Cannot start a transaction inside another transaction.');
+    }
+
+    return _executor.privideConnection((connection) async {
+      final executor = _executor.withConnectionProvider(
+        ConnectionProvider.single(connection),
+      );
+      final transaction = _Transaction(
+        dialect: _dialect,
+        executor: executor,
+        driver: _driver,
+        withSpec: _withSpec,
+      );
+
+      try {
+        await _driver.beginTransaction(connection,
+            isolationLevel: isolationLevel);
+        final result = await execute(transaction);
+        await _driver.commitTransaction(connection);
+
+        return result;
+      } catch (e) {
+        await _driver.rollbackTransaction(connection);
+
+        rethrow;
+      }
+    });
   }
+}
+
+class _Transaction<DB, Data> extends Oh<DB> {
+  _Transaction({
+    required super.dialect,
+    required QueryExecutor<DB> executor,
+    WithSpec? withSpec,
+    required Driver driver,
+  }) : super._(executor: executor, withSpec: withSpec, driver: driver);
 
   @override
-  Future<QueryResult<T>> execute<T>(
-      CompiledQuery<T> query, QueryIdentifier identifier) {
-    return executor.execute(query, identifier);
-  }
-
-  @override
-  Future<T> privideConnection<T>(
-      Future<T> Function(DatabaseConnection connection) consumer) {
-    return executor.privideConnection(consumer);
-  }
-
-  @override
-  Stream<QueryResult<T>> stream<T>(
-    CompiledQuery<T> query,
-    QueryIdentifier identifier, {
-    int? chunkSize,
-  }) {
-    return executor.stream(query, identifier, chunkSize: chunkSize);
-  }
+  bool get isTransaction => true;
 }

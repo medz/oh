@@ -9,14 +9,14 @@ abstract interface class DatabaseConnection {
 }
 
 class QueryResult<T> {
-  final int? numAffectedRows;
-  final int? numChangedRows;
+  final int? affectedRows;
+  final int? changedRows;
   final int? lastInsertId;
   final Iterable<T> rows;
 
   const QueryResult({
-    this.numAffectedRows,
-    this.numChangedRows,
+    this.affectedRows,
+    this.changedRows,
     this.lastInsertId,
     required this.rows,
   });

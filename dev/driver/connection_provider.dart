@@ -7,6 +7,9 @@ abstract interface class ConnectionProvider {
   );
 
   const factory ConnectionProvider(Driver driver) = _InnerConnectProvider;
+
+  const factory ConnectionProvider.single(DatabaseConnection connection) =
+      _SingleConnectionProvider;
 }
 
 class _InnerConnectProvider implements ConnectionProvider {
@@ -24,4 +27,15 @@ class _InnerConnectProvider implements ConnectionProvider {
       await driver.releaseConnection(connection);
     }
   }
+}
+
+class _SingleConnectionProvider implements ConnectionProvider {
+  final DatabaseConnection _connection;
+
+  const _SingleConnectionProvider(this._connection);
+
+  @override
+  Future<T> privideConnection<T>(
+          Future<T> Function(DatabaseConnection connection) consumer) =>
+      consumer(_connection);
 }
