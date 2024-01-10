@@ -18,5 +18,7 @@ void main(List<String> args) {
     table.text("remember_token").references('users', ['id']);
   });
 
+  print(oh.schema.dropTable('users').ifExists().compile());
+
   print(demo.compile().sql);
 }

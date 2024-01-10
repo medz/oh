@@ -8,6 +8,7 @@ import 'create_table_spec.dart';
 import 'data_type_spec.dart';
 import 'default_value_spec.dart';
 import 'drop_schema_spec.dart';
+import 'drop_table_spec.dart';
 import 'generated_spec.dart';
 import 'identifier_spec.dart';
 import 'modifier_spec.dart';
@@ -42,8 +43,25 @@ abstract class SpecVistor {
       ModifierSpec spec => visitModifierSpec(spec),
       ReferencesSpec spec => visitReferencesSpec(spec),
       TableColumnDefSpec spec => visitTableColumnDefSpec(spec),
+      DropTableSpec spec => visitDropTableSpec(spec),
       _ => throw Exception('Unknown spec type: $spec'),
     };
+  }
+
+  (String, Iterable<Object>) visitDropTableSpec(DropTableSpec spec) {
+    final sql = StringBuffer('DROP TABLE ');
+    if (spec.ifExists) {
+      sql.write('IF EXISTS ');
+    }
+
+    final table = visitSpec(spec.table);
+    sql.write(table.$1);
+
+    if (spec.cascade) {
+      sql.write(' CASCADE');
+    }
+
+    return (sql.toString(), table.$2);
   }
 
   (String, Iterable<Object>) visitTableColumnDefSpec(TableColumnDefSpec spec) {

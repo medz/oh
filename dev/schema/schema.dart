@@ -4,10 +4,12 @@ import '../query_executor/query_identifier.dart';
 import '../specs/create_schema_spec.dart';
 import '../specs/create_table_spec.dart';
 import '../specs/drop_schema_spec.dart';
+import '../specs/drop_table_spec.dart';
 import '../specs/identifier_spec.dart';
 import '../specs/table_spec.dart';
 import 'builders/create_schema_builder.dart';
 import 'builders/drop_schema_builder.dart';
+import 'builders/drop_table_builder.dart';
 import 'builders/table_builder.dart';
 
 final class Schema<DB> {
@@ -31,6 +33,17 @@ final class Schema<DB> {
     builder(table);
 
     return table;
+  }
+
+  /// Creates a new drop table builder.
+  DropTableBuilder<DB> dropTable(String name) {
+    return DropTableBuilder(
+      identifier: QueryIdentifier(),
+      executor: _executor,
+      spec: DropTableSpec(
+        TableSpec(name: IdentifierSpec(name)),
+      ),
+    );
   }
 }
 
