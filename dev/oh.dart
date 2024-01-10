@@ -4,6 +4,7 @@ import 'dialect/database_introspector.dart';
 import 'dialect/dialect.dart';
 import 'driver/connection_provider.dart';
 import 'driver/driver.dart';
+import 'driver/runtime_driver.dart';
 import 'query_creator.dart';
 import 'query_executor/query_executor.dart';
 import 'schema/schema.dart';
@@ -26,10 +27,8 @@ class Oh<DB> extends QueryCreator<DB> {
         _driver = driver,
         super(executor: executor, withSpec: withSpec);
 
-  factory Oh({Dialect<DB>? dialect}) {
-    dialect ??= Dialect();
-
-    final driver = dialect.createDriver();
+  factory Oh({required Dialect<DB> dialect}) {
+    final driver = RuntimeDriver(dialect.createDriver);
     final executor = QueryExecutor<DB>(
       compiler: dialect.createQueryCompiler(),
       adapter: dialect.createAdapter(),

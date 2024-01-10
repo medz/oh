@@ -18,18 +18,6 @@ class CreateSchemaBuilder implements StatementBuilder<CreateSchemaSpec, void> {
         _identifier = identifier,
         _executor = executor;
 
-  CreateSchemaBuilder cascade([bool value = true]) {
-    return CreateSchemaBuilder(
-      identifier: _identifier,
-      executor: _executor,
-      spec: CreateSchemaSpec(
-        name: _spec.name,
-        ifNotExists: _spec.ifNotExists,
-        cascade: value,
-      ),
-    );
-  }
-
   CreateSchemaBuilder ifNotExists([bool value = true]) {
     return CreateSchemaBuilder(
       identifier: _identifier,
@@ -37,7 +25,6 @@ class CreateSchemaBuilder implements StatementBuilder<CreateSchemaSpec, void> {
       spec: CreateSchemaSpec(
         name: _spec.name,
         ifNotExists: value,
-        cascade: _spec.cascade,
       ),
     );
   }

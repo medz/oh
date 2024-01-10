@@ -5,7 +5,7 @@ class CompiledQuery<T> {
   final StatementSpec statement;
 
   /// Compiled query parameters.
-  final Iterable<Object?> params;
+  final Iterable<Object> params;
 
   /// Compiled query SQL string.
   final String sql;

@@ -24,8 +24,8 @@ class DropSchemaBuilder implements StatementBuilder<DropSchemaSpec, void> {
       identifier: _identifier,
       spec: DropSchemaSpec(
         name: _spec.name,
-        ifExists: _spec.ifExists,
-        cascade: value,
+        ifExists: value,
+        cascade: _spec.cascade,
       ),
     );
   }

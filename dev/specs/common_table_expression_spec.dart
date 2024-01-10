@@ -3,12 +3,12 @@ import 'spec.dart';
 
 class CommonTableExpressionSpec implements Spec {
   final CommonTableExpressionNameSpec name;
-  final bool materialized;
+  final bool? materialized;
   final Spec expression;
 
   const CommonTableExpressionSpec({
     required this.name,
-    this.materialized = false,
+    this.materialized,
     required this.expression,
   });
 }
