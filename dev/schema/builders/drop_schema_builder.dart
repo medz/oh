@@ -5,7 +5,8 @@ import '../../query_executor/query_executor.dart';
 import '../../query_executor/query_identifier.dart';
 import '../../specs/drop_schema_spec.dart';
 
-class DropSchemaBuilder implements StatementBuilder<DropSchemaSpec, void> {
+class DropSchemaBuilder<DB>
+    implements StatementBuilder<DB, DropSchemaSpec, void> {
   final DropSchemaSpec _spec;
   final QueryIdentifier _identifier;
   final QueryExecutor _executor;
@@ -18,7 +19,7 @@ class DropSchemaBuilder implements StatementBuilder<DropSchemaSpec, void> {
         _identifier = identifier,
         _executor = executor;
 
-  DropSchemaBuilder ifExists([bool value = true]) {
+  DropSchemaBuilder<DB> ifExists([bool value = true]) {
     return DropSchemaBuilder(
       executor: _executor,
       identifier: _identifier,
@@ -30,7 +31,7 @@ class DropSchemaBuilder implements StatementBuilder<DropSchemaSpec, void> {
     );
   }
 
-  DropSchemaBuilder cascade([bool value = true]) {
+  DropSchemaBuilder<DB> cascade([bool value = true]) {
     return DropSchemaBuilder(
       executor: _executor,
       identifier: _identifier,

@@ -16,18 +16,18 @@ class Oh<DB> extends QueryCreator<DB> {
   final WithSpec? _withSpec;
   final Driver _driver;
 
-  const Oh._(
-      {required QueryExecutor<DB> executor,
-      required Dialect<DB> dialect,
-      WithSpec? withSpec,
-      required Driver driver})
-      : _executor = executor,
+  const Oh._({
+    required QueryExecutor<DB> executor,
+    required Dialect<DB> dialect,
+    WithSpec? withSpec,
+    required Driver driver,
+  })  : _executor = executor,
         _dialect = dialect,
         _withSpec = withSpec,
         _driver = driver,
         super(executor: executor, withSpec: withSpec);
 
-  factory Oh({required Dialect<DB> dialect}) {
+  factory Oh(Dialect<DB> dialect) {
     final driver = RuntimeDriver(dialect.createDriver);
     final executor = QueryExecutor<DB>(
       compiler: dialect.createQueryCompiler(),
@@ -88,12 +88,12 @@ class Oh<DB> extends QueryCreator<DB> {
 }
 
 class _Transaction<DB, Data> extends Oh<DB> {
-  _Transaction({
+  const _Transaction({
     required super.dialect,
-    required QueryExecutor<DB> executor,
-    WithSpec? withSpec,
-    required Driver driver,
-  }) : super._(executor: executor, withSpec: withSpec, driver: driver);
+    required super.driver,
+    required super.executor,
+    super.withSpec,
+  }) : super._();
 
   @override
   bool get isTransaction => true;

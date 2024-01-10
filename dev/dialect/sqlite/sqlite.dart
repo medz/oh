@@ -1,4 +1,7 @@
-abstract interface class SQLite {
+import '../../driver/database_support.dart';
+
+abstract interface class SQLite
+    implements DatabaseSupportReturning, DatabaseSupportCreateIfNotExists {
   void close();
   SQLiteStatement prepare(String sql);
 }
