@@ -1,5 +1,5 @@
-import 'check_constraint_spec.dart';
 import 'column_spec.dart';
+import 'constraint_spec.dart';
 import 'default_value_spec.dart';
 import 'generated_spec.dart';
 import 'modifier_spec.dart';

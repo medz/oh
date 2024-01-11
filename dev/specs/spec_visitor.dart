@@ -1,4 +1,7 @@
-import 'check_constraint_spec.dart';
+import 'add_constraint_spec.dart';
+import 'add_index_spec.dart';
+import 'alter_table_spec.dart';
+import 'alteration_column_spec.dart';
 import 'column_spec.dart';
 import 'common_table_expression_name_spec.dart';
 import 'common_table_expression_spec.dart';
@@ -7,21 +10,28 @@ import 'create_schema_spec.dart';
 import 'create_table_spec.dart';
 import 'data_type_spec.dart';
 import 'default_value_spec.dart';
+import 'drop_constraint_spec.dart';
+import 'drop_index_spec.dart';
 import 'drop_schema_spec.dart';
 import 'drop_table_spec.dart';
 import 'generated_spec.dart';
 import 'identifier_spec.dart';
 import 'modifier_spec.dart';
+import 'raw_spec.dart';
 import 'references_spec.dart';
+import 'schemable_identifier_spec.dart';
 import 'spec.dart';
 import 'table_column_def_spec.dart';
 import 'table_spec.dart';
 import 'with_spec.dart';
 
+typedef SpecVisitedResult = (String sql, Iterable<Object> params);
+
 abstract class SpecVistor {
   const SpecVistor();
 
   String get autoIncrementIdentifier => 'AUTO_INCREMENT';
+  bool get announcesNewColumnDataType => true;
 
   (String sql, Iterable<Object> params) visitSpec(Spec spec) {
     return switch (spec) {
@@ -35,6 +45,9 @@ abstract class SpecVistor {
       TableSpec spec => visitTableSpec(spec),
       WithSpec spec => visitWithSpec(spec),
       CheckConstraintSpec spec => visitCheckConstraintSpec(spec),
+      PrimaryKeyConstraintSpec spec => visitPrimaryKeyConstraintSpec(spec),
+      UniqueConstraintSpec spec => visitUniqueConstraintSpec(spec),
+      ForeignKeyConstraintNode spec => visitForeignKeyConstraintNode(spec),
       ConstraintSpec spec => visitConstraintSpec(spec),
       CreateTableSpec spec => visitCreateTableSpec(spec),
       DataTypeSpec spec => visitDataTypeSpec(spec),
@@ -44,8 +57,350 @@ abstract class SpecVistor {
       ReferencesSpec spec => visitReferencesSpec(spec),
       TableColumnDefSpec spec => visitTableColumnDefSpec(spec),
       DropTableSpec spec => visitDropTableSpec(spec),
+      AddConstraintSpec spec => visitAddConstraintSpec(spec),
+      AddIndexSpec spec => visitAddIndexSpec(spec),
+      AlterTableSpec spec => visitAlterTableSpec(spec),
+      RenameColumnSpec spec => visitRenameColumnSpec(spec),
+      AddColumnSpec spec => visitAddColumnSpec(spec),
+      DropColumnSpec spec => visitDropColumnSpec(spec),
+      AlterColumnSpec spec => visitAlterColumnSpec(spec),
+      ModifierColumnSpec spec => visitModifierColumnSpec(spec),
+      DropConstraintSpec spec => visitDropConstraintSpec(spec),
+      DropIndexSpec spec => visitDropIndexSpec(spec),
+      RawSpec spec => visitRawSpec(spec),
+      SchemableIdentifierSpec spec => visitSchemableIdentifierSpec(spec),
       _ => throw Exception('Unknown spec type: $spec'),
     };
+  }
+
+  SpecVisitedResult visitSchemableIdentifierSpec(SchemableIdentifierSpec spec) {
+    final sql = StringBuffer();
+    final params = <Object>[];
+
+    if (spec.schema != null) {
+      final schema = visitSpec(spec.schema!);
+      sql.write(schema.$1);
+      sql.write('.');
+      params.addAll(schema.$2);
+    }
+
+    final identifier = visitSpec(spec.identifier);
+    sql.write(identifier.$1);
+    params.addAll(identifier.$2);
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitRawSpec(RawSpec spec) {
+    final buffer = StringBuffer();
+    final params = <Object>[];
+
+    for (final (sql, param) in spec.fragments) {
+      buffer.write(sql);
+      final result = visitSpec(param);
+      buffer.write(result.$1);
+      params.addAll(result.$2);
+    }
+
+    return (buffer.toString(), params);
+  }
+
+  SpecVisitedResult visitDropIndexSpec(DropIndexSpec spec) {
+    final sql = StringBuffer('DROP INDEX ');
+    if (spec.ifExists) sql.write('IF EXISTS ');
+
+    final name = visitSpec(spec.name);
+    sql.write(name.$1);
+
+    if (spec.table != null) {
+      final table = visitSpec(spec.table!);
+      sql.write(' ON ');
+      sql.write(table.$1);
+    }
+
+    if (spec.cascade) {
+      sql.write(' CASCADE');
+    }
+
+    return (sql.toString(), name.$2);
+  }
+
+  SpecVisitedResult visitDropConstraintSpec(DropConstraintSpec spec) {
+    final sql = StringBuffer('DROP CONSTRAINT ');
+    if (spec.ifExists) sql.write('IF EXISTS ');
+
+    final name = visitSpec(spec.name);
+    sql.write(name.$1);
+
+    if (spec.modifier != null) {
+      sql.write(' ');
+      sql.write(switch (spec.modifier!) {
+        DropConstraintModifier.cascade => 'CASCADE',
+        DropConstraintModifier.restrict => 'RESTRICT',
+      });
+    }
+
+    return (sql.toString(), name.$2);
+  }
+
+  SpecVisitedResult visitForeignKeyConstraintNode(
+      ForeignKeyConstraintNode spec) {
+    final sql = StringBuffer();
+    final params = <Object>[];
+
+    if (spec.name != null) {
+      final name = visitSpec(spec.name!);
+      sql.write('CONSTRAINT ');
+      sql.write(name.$1);
+      sql.write(' ');
+      params.addAll(name.$2);
+    }
+
+    final columns = spec.columns.map(visitSpec);
+    sql.write('FOREIGN KEY (');
+    sql.writeAll(columns.map((column) => column.$1), ', ');
+    sql.write(')');
+    params.addAll(columns.expand((column) => column.$2));
+
+    final references = visitSpec(spec.references);
+    sql.write(' ');
+    sql.write(references.$1);
+    params.addAll(references.$2);
+
+    if (spec.onDelete != null) {
+      sql.write(' ON DELETE ');
+      sql.write(visitOnModifyForeignAction(spec.onDelete!));
+    }
+
+    if (spec.onUpdate != null) {
+      sql.write(' ON UPDATE ');
+      sql.write(visitOnModifyForeignAction(spec.onUpdate!));
+    }
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitUniqueConstraintSpec(UniqueConstraintSpec spec) {
+    final sql = StringBuffer();
+    final params = <Object>[];
+
+    if (spec.name != null) {
+      final name = visitSpec(spec.name!);
+      sql.write(name.$1);
+      sql.write(' ');
+      params.addAll(name.$2);
+    }
+
+    sql.write('UNIQUE');
+    if (spec.nullsNotDistinct) {
+      sql.write(' NULLS NOT DISTINCT');
+    }
+
+    final columns = spec.columns.map(visitSpec);
+    sql.write(' (');
+    sql.writeAll(columns.map((column) => column.$1), ', ');
+    sql.write(')');
+    params.addAll(columns.expand((column) => column.$2));
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitPrimaryKeyConstraintSpec(
+      PrimaryKeyConstraintSpec spec) {
+    final sql = StringBuffer();
+    final params = <Object>[];
+
+    if (spec.name != null) {
+      final name = visitSpec(spec.name!);
+      sql.write(name.$1);
+      sql.write(' ');
+      params.addAll(name.$2);
+    }
+
+    sql.write('PRIMARY KEY (');
+    final columns = spec.columns.map(visitSpec);
+    sql.writeAll(columns.map((column) => column.$1), ', ');
+    sql.write(')');
+    params.addAll(columns.expand((column) => column.$2));
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitModifierColumnSpec(ModifierColumnSpec spec) {
+    final sql = StringBuffer('MODIFY COLUMN ');
+    final result = visitSpec(spec.column);
+    sql.write(result.$1);
+
+    return (sql.toString(), result.$2);
+  }
+
+  SpecVisitedResult visitAlterColumnSpec(AlterColumnSpec spec) {
+    final sql = StringBuffer('ALTER COLUMN ');
+    final params = <Object>[];
+
+    final column = visitSpec(spec.column);
+    sql.write(column.$1);
+    params.addAll(column.$2);
+
+    if (spec.dataType != null) {
+      if (announcesNewColumnDataType) {
+        sql.write(' TYPE');
+      }
+
+      final dataType = visitSpec(spec.dataType!);
+      sql.write(' ');
+      sql.write(dataType.$1);
+      params.addAll(dataType.$2);
+
+      if (spec.using != null) {
+        sql.write(' USING ');
+        final using = visitSpec(spec.using!);
+        sql.write(using.$1);
+        params.addAll(using.$2);
+      }
+    }
+
+    if (spec.setDefault != null) {
+      final setDefault = visitSpec(spec.setDefault!);
+      sql.write(' SET DEFAULT ');
+      sql.write(setDefault.$1);
+      params.addAll(setDefault.$2);
+    }
+
+    if (spec.dropDefault) sql.write(' DROP DEFAULT');
+    if (spec.setNotNull) sql.write(' SET NOT NULL');
+    if (spec.dropNotNull) sql.write(' DROP NOT NULL');
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitDropColumnSpec(DropColumnSpec spec) {
+    final sql = StringBuffer('DROP COLUMN ');
+    final result = visitSpec(spec.column);
+    sql.write(result.$1);
+
+    return (sql.toString(), result.$2);
+  }
+
+  SpecVisitedResult visitAddColumnSpec(AddColumnSpec spec) {
+    final sql = StringBuffer('ADD COLUMN ');
+    final result = visitSpec(spec.column);
+    sql.write(result.$1);
+
+    return (sql.toString(), result.$2);
+  }
+
+  SpecVisitedResult visitRenameColumnSpec(RenameColumnSpec spec) {
+    final sql = StringBuffer('RENAME COLUMN ');
+    final params = <Object>[];
+
+    final column = visitSpec(spec.column);
+    sql.write(column.$1);
+    params.addAll(column.$2);
+
+    sql.write(' TO ');
+    final rename = visitSpec(spec.rename);
+    sql.write(rename.$1);
+    params.addAll(rename.$2);
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitAlterTableSpec(AlterTableSpec spec) {
+    final sql = StringBuffer('ALTER TABLE ');
+    final params = <Object>[];
+
+    final table = visitSpec(spec.table);
+    sql.write(table.$1);
+    params.addAll(table.$2);
+
+    if (spec.renameTo != null) {
+      final renameTo = visitSpec(spec.renameTo!);
+      sql.write(' RENAME TO ');
+      sql.write(renameTo.$1);
+      params.addAll(renameTo.$2);
+    }
+
+    if (spec.setSchema != null) {
+      final setSchema = visitSpec(spec.setSchema!);
+      sql.write(' SET SCHEMA ');
+      sql.write(setSchema.$1);
+      params.addAll(setSchema.$2);
+    }
+
+    if (spec.addConstraint != null) {
+      final addConstraint = visitSpec(spec.addConstraint!);
+      sql.write(' ');
+      sql.write(addConstraint.$1);
+      params.addAll(addConstraint.$2);
+    }
+
+    if (spec.dropConstraint != null) {
+      final dropConstraint = visitSpec(spec.dropConstraint!);
+      sql.write(' ');
+      sql.write(dropConstraint.$1);
+      params.addAll(dropConstraint.$2);
+    }
+
+    if (spec.columns.isNotEmpty) {
+      final columns = spec.columns.map(visitSpec);
+      sql.write(' ');
+      sql.writeAll(columns.map((column) => column.$1), ', ');
+      params.addAll(columns.expand((column) => column.$2));
+    }
+
+    if (spec.addIndex != null) {
+      final addIndex = visitSpec(spec.addIndex!);
+      sql.write(' ');
+      sql.write(addIndex.$1);
+      params.addAll(addIndex.$2);
+    }
+
+    if (spec.dropIndex != null) {
+      final dropIndex = visitSpec(spec.dropIndex!);
+      sql.write(' ');
+      sql.write(dropIndex.$1);
+      params.addAll(dropIndex.$2);
+    }
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitAddIndexSpec(AddIndexSpec spec) {
+    final sql = StringBuffer('ADD ');
+    final params = <Object>[];
+
+    if (spec.unique) sql.write('UNIQUE ');
+
+    sql.write('INDEX ');
+    final name = visitSpec(spec.name);
+    sql.write(name.$1);
+    params.addAll(name.$2);
+
+    if (spec.columns.isNotEmpty) {
+      final columns = spec.columns.map(visitSpec);
+      sql.write(' (');
+      sql.writeAll(columns.map((column) => column.$1), ', ');
+      sql.write(')');
+      params.addAll(columns.expand((column) => column.$2));
+    }
+
+    if (spec.using != null) {
+      final using = visitSpec(spec.using!);
+      sql.write(' USING ');
+      sql.write(using.$1);
+      params.addAll(using.$2);
+    }
+
+    return (sql.toString(), params);
+  }
+
+  SpecVisitedResult visitAddConstraintSpec(AddConstraintSpec spec) {
+    final sql = StringBuffer('ADD ');
+    final result = visitSpec(spec.constraint);
+    sql.write(result.$1);
+
+    return (sql.toString(), result.$2);
   }
 
   (String, Iterable<Object>) visitDropTableSpec(DropTableSpec spec) {

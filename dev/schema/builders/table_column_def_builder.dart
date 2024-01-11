@@ -6,44 +6,49 @@ import '../../specs/table_column_def_spec.dart';
 import '../../specs/table_spec.dart';
 
 class TableColumnDefBuilder<DB, T> implements SpecSource<TableColumnDefSpec> {
-  TableColumnDefSpec spec;
+  TableColumnDefSpec _spec;
 
-  TableColumnDefBuilder(this.spec);
+  TableColumnDefBuilder(TableColumnDefSpec spec) : _spec = spec;
 
   @override
-  TableColumnDefSpec toSpec() => spec;
+  TableColumnDefSpec toSpec() => _spec;
+
+  /// Updates the column spec.
+  void updateSpec(TableColumnDefSpec Function(TableColumnDefSpec spec) fn) {
+    _spec = fn(_spec);
+  }
 
   /// Changes the column to be a primary key.
   TableColumnDefBuilder<DB, T> primaryKey() {
-    spec = spec.copyWith(primaryKey: true);
+    _spec = _spec.copyWith(primaryKey: true);
 
     return this;
   }
 
   /// Changes the column to have nulls not distinct.
   TableColumnDefBuilder<DB, T> nullsNotDistinct() {
-    spec = spec.copyWith(nullsNotDistinct: true);
+    _spec = _spec.copyWith(nullsNotDistinct: true);
 
     return this;
   }
 
   /// Changes the column to be unique.
   TableColumnDefBuilder<DB, T> unique() {
-    spec = spec.copyWith(unique: true);
+    _spec = _spec.copyWith(unique: true);
 
     return this;
   }
 
   /// Changes the column to be not null.
   TableColumnDefBuilder<DB, T> notNull() {
-    spec = spec.copyWith(notNull: true);
+    _spec = _spec.copyWith(notNull: true);
 
     return this;
   }
 
   /// Changes the column to nullsNotDistinct is true.
   TableColumnDefBuilder<DB, T> notDistinct() {
-    spec = spec.copyWith(nullsNotDistinct: true);
+    _spec = _spec.copyWith(nullsNotDistinct: true);
 
     return this;
   }
@@ -62,7 +67,7 @@ class TableColumnDefBuilder<DB, T> implements SpecSource<TableColumnDefSpec> {
       onUpdate: onUpdate,
     );
 
-    spec = spec.copyWith(references: ref);
+    _spec = _spec.copyWith(references: ref);
 
     return this;
   }

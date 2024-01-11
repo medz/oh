@@ -1,4 +1,5 @@
-import 'dev/dialect/sqlite/schema/sqlite_table_builder.dart';
+import 'dev/dialect/sqlite/schema/sqlite+columl_def_builder.dart';
+import 'dev/dialect/sqlite/schema/sqlite+create_table_builder.dart';
 import 'dev/dialect/sqlite/sqlite_dialect.dart';
 import 'dev/oh.dart';
 import 'dev/schema/builders/create_table_builder.dart';
@@ -8,7 +9,7 @@ void main(List<String> args) {
     factory: () => throw UnimplementedError(),
   );
   final oh = Oh(dialect);
-  final demo = oh.schema.createTable('users', (table) {
+  final createTable = oh.schema.createTable('users', (table) {
     table.ifNotExists = true;
 
     table.integer("id").primaryKey().autoIncrement();
@@ -17,8 +18,6 @@ void main(List<String> args) {
     table.text("password").notNull();
     table.text("remember_token").references('users', ['id']);
   });
-
+  print(createTable.compile());
   print(oh.schema.dropTable('users').ifExists().compile());
-
-  print(demo.compile().sql);
 }

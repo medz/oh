@@ -8,7 +8,7 @@ import '../dialect_adapter.dart';
 import 'sqlite.dart';
 import 'sqlite_adapter.dart';
 import 'sqlite_driver.dart';
-import 'sqlite_spec_visitor.dart';
+import 'specs/sqlite_spec_visitor.dart';
 
 class SQLiteDialect implements Dialect<SQLite> {
   final Future<SQLite> Function() _factory;

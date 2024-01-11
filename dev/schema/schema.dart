@@ -8,9 +8,9 @@ import '../specs/drop_table_spec.dart';
 import '../specs/identifier_spec.dart';
 import '../specs/table_spec.dart';
 import 'builders/create_schema_builder.dart';
+import 'builders/create_table_builder.dart';
 import 'builders/drop_schema_builder.dart';
 import 'builders/drop_table_builder.dart';
-import 'builders/table_builder.dart';
 
 final class Schema<DB> {
   final QueryExecutor<DB> _executor;
@@ -18,11 +18,11 @@ final class Schema<DB> {
   const Schema(QueryExecutor<DB> executor) : _executor = executor;
 
   /// Creates a new create table builder.
-  TableBuilder<DB, CreateTableSpec, void> createTable(
+  CreateTableBuilder<DB> createTable(
     String name,
-    void Function(TableBuilder<DB, CreateTableSpec, void> table) builder,
+    void Function(CreateTableBuilder<DB> table) builder,
   ) {
-    final table = TableBuilder<DB, CreateTableSpec, void>(
+    final table = CreateTableBuilder<DB>(
       identifier: QueryIdentifier(),
       executor: _executor,
       spec: CreateTableSpec(
