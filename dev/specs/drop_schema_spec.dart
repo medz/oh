@@ -17,4 +17,16 @@ class DropSchemaSpec implements StatementSpec {
     this.ifExists = false,
     this.cascade = false,
   });
+
+  /// Copies this [DropSchemaSpec] with the given parameters.
+  DropSchemaSpec copyWith({
+    IdentifierSpec? name,
+    bool? ifExists,
+    bool? cascade,
+  }) =>
+      DropSchemaSpec(
+        name: name ?? this.name,
+        ifExists: ifExists ?? this.ifExists,
+        cascade: cascade ?? this.cascade,
+      );
 }

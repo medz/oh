@@ -7,7 +7,7 @@ import 'driver/driver.dart';
 import 'driver/runtime_driver.dart';
 import 'query_creator.dart';
 import 'query_executor/query_executor.dart';
-import 'schema/schema.dart';
+import 'schema_builder/schema_builder.dart';
 import 'specs/with_spec.dart';
 
 class Oh<DB> extends QueryCreator<DB> {
@@ -48,8 +48,8 @@ class Oh<DB> extends QueryCreator<DB> {
   /// Returns a database introspector.
   DatabaseIntrospector get introspector => _dialect.createIntrospector(this);
 
-  /// Returns the oh schema.
-  Schema<DB> get schema => Schema(_executor);
+  /// Returns a new schema builder.
+  SchemaBuilder<DB, void> get schema => SchemaBuilder(executor: _executor);
 
   /// Returns value in interactive transaction.
   Future<T> transaction<T>(

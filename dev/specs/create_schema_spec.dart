@@ -9,4 +9,14 @@ class CreateSchemaSpec implements StatementSpec {
     required this.name,
     this.ifNotExists = false,
   });
+
+  CreateSchemaSpec copyWith({
+    IdentifierSpec? name,
+    bool? ifNotExists,
+  }) {
+    return CreateSchemaSpec(
+      name: name ?? this.name,
+      ifNotExists: ifNotExists ?? this.ifNotExists,
+    );
+  }
 }

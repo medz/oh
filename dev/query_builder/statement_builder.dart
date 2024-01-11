@@ -25,4 +25,17 @@ abstract class StatementBuilder<DB, T extends StatementSpec, R>
   Future<QueryResult<R>> execute() {
     return _executor.execute(compile(), _identifier);
   }
+
+  @override
+  String toString() {
+    final result = compile();
+    final buffer = StringBuffer(T);
+    buffer.writeln();
+    buffer.writeln("    SQL: ${result.sql}");
+    if (result.params.isNotEmpty) {
+      buffer.writeln("    Params: ${result.params.toList()}");
+    }
+
+    return buffer.toString();
+  }
 }
