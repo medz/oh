@@ -21,7 +21,7 @@ import 'raw_spec.dart';
 import 'references_spec.dart';
 import 'schemable_identifier_spec.dart';
 import 'spec.dart';
-import 'table_column_def_spec.dart';
+import 'column_def_spec.dart';
 import 'table_spec.dart';
 import 'with_spec.dart';
 
@@ -55,7 +55,7 @@ abstract class SpecVistor {
       GeneratedSpec spec => visitGeneratedSpec(spec),
       ModifierSpec spec => visitModifierSpec(spec),
       ReferencesSpec spec => visitReferencesSpec(spec),
-      TableColumnDefSpec spec => visitTableColumnDefSpec(spec),
+      ColumnDefSpec spec => visitColumnDefSpec(spec),
       DropTableSpec spec => visitDropTableSpec(spec),
       AddConstraintSpec spec => visitAddConstraintSpec(spec),
       AddIndexSpec spec => visitAddIndexSpec(spec),
@@ -419,7 +419,7 @@ abstract class SpecVistor {
     return (sql.toString(), table.$2);
   }
 
-  (String, Iterable<Object>) visitTableColumnDefSpec(TableColumnDefSpec spec) {
+  (String, Iterable<Object>) visitColumnDefSpec(ColumnDefSpec spec) {
     final sql = StringBuffer();
     final params = <Object>[];
 
@@ -677,20 +677,7 @@ abstract class SpecVistor {
   }
 
   (String sql, Iterable<Object> params) visitTableSpec(TableSpec spec) {
-    final sql = StringBuffer();
-    final params = <Object>[];
-
-    if (spec.schema != null) {
-      final schema = visitSpec(spec.schema!);
-      sql.write(schema.$1);
-      sql.write('.');
-      params.addAll(schema.$2);
-    }
-
-    final name = visitSpec(spec.name);
-    sql.write(name.$1);
-
-    return (sql.toString(), [...params, ...name.$2]);
+    return visitSpec(spec.table);
   }
 
   (String sql, Iterable<Object> params) visitIdentifierSpec(

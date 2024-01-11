@@ -6,7 +6,7 @@ import 'modifier_spec.dart';
 import 'references_spec.dart';
 import 'spec.dart';
 
-class TableColumnDefSpec implements Spec {
+class ColumnDefSpec implements Spec {
   final ColumnSpec column;
   final Spec dataType;
   final ReferencesSpec? references;
@@ -21,7 +21,7 @@ class TableColumnDefSpec implements Spec {
   final bool unique;
   final bool notNull;
 
-  const TableColumnDefSpec({
+  const ColumnDefSpec({
     required this.column,
     required this.dataType,
     this.references,
@@ -37,7 +37,7 @@ class TableColumnDefSpec implements Spec {
     this.notNull = false,
   });
 
-  TableColumnDefSpec copyWith({
+  ColumnDefSpec copyWith({
     ColumnSpec? column,
     Spec? dataType,
     ReferencesSpec? references,
@@ -52,7 +52,7 @@ class TableColumnDefSpec implements Spec {
     bool? unique,
     bool? notNull,
   }) {
-    return TableColumnDefSpec(
+    return ColumnDefSpec(
       column: column ?? this.column,
       dataType: dataType ?? this.dataType,
       references: references ?? this.references,

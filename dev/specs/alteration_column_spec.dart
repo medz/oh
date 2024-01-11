@@ -1,6 +1,6 @@
 import 'column_spec.dart';
 import 'spec.dart';
-import 'table_column_def_spec.dart';
+import 'column_def_spec.dart';
 
 abstract interface class AlterationColumnSpec implements Spec {}
 
@@ -12,7 +12,7 @@ class RenameColumnSpec implements AlterationColumnSpec {
 }
 
 class AddColumnSpec implements AlterationColumnSpec {
-  final TableColumnDefSpec column;
+  final ColumnDefSpec column;
 
   const AddColumnSpec(this.column);
 }

@@ -2,7 +2,7 @@ import 'constraint_spec.dart';
 import 'modifier_spec.dart';
 import 'spec.dart';
 import 'statement_spec.dart';
-import 'table_column_def_spec.dart';
+import 'column_def_spec.dart';
 import 'table_spec.dart';
 
 enum OnCommitAction {
@@ -13,7 +13,7 @@ enum OnCommitAction {
 
 class CreateTableSpec implements StatementSpec {
   final TableSpec table;
-  final Iterable<TableColumnDefSpec> columns;
+  final Iterable<ColumnDefSpec> columns;
   final Iterable<ConstraintSpec> constraints;
   final bool temporary;
   final bool ifNotExists;
@@ -34,7 +34,7 @@ class CreateTableSpec implements StatementSpec {
 
   CreateTableSpec copyWith({
     TableSpec? table,
-    Iterable<TableColumnDefSpec>? columns,
+    Iterable<ColumnDefSpec>? columns,
     Iterable<ConstraintSpec>? constraints,
     bool? temporary,
     bool? ifNotExists,
