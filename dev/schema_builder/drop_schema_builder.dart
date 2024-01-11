@@ -6,25 +6,20 @@ import '../specs/drop_schema_spec.dart';
 class DropSchemaBuilder<DB> extends StatementBuilder<DB, DropSchemaSpec, void> {
   final QueryExecutor<DB> _executor;
   final QueryIdentifier _identifier;
-  final DropSchemaSpec _spec;
 
   const DropSchemaBuilder({
     required super.executor,
     required super.identifier,
-    required DropSchemaSpec spec,
+    required super.spec,
   })  : _executor = executor,
-        _identifier = identifier,
-        _spec = spec;
-
-  @override
-  DropSchemaSpec toSpec() => _spec;
+        _identifier = identifier;
 
   /// Whether to drop the schema only if it exists.
   DropSchemaBuilder<DB> ifExists() {
     return DropSchemaBuilder(
       executor: _executor,
       identifier: _identifier,
-      spec: _spec.copyWith(ifExists: true),
+      spec: toSpec().copyWith(ifExists: true),
     );
   }
 
@@ -34,7 +29,7 @@ class DropSchemaBuilder<DB> extends StatementBuilder<DB, DropSchemaSpec, void> {
     return DropSchemaBuilder(
       executor: _executor,
       identifier: _identifier,
-      spec: _spec.copyWith(cascade: true),
+      spec: toSpec().copyWith(cascade: true),
     );
   }
 }

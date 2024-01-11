@@ -8,7 +8,7 @@ import 'drop_schema_builder.dart';
 
 class SchemaBuilder<DB, Tag> {
   /// Current selected database schema.
-  final String? name;
+  final String? _name;
 
   /// Inner query executor.
   final QueryExecutor<DB> _executor;
@@ -16,8 +16,9 @@ class SchemaBuilder<DB, Tag> {
   /// Creates a new schema builder.
   const SchemaBuilder({
     required QueryExecutor<DB> executor,
-    this.name,
-  }) : _executor = executor;
+    String? name,
+  })  : _executor = executor,
+        _name = name;
 }
 
 extension SchemaBuilder$Call<DB> on SchemaBuilder<DB, void> {
@@ -41,13 +42,16 @@ extension SchemaBuilder$Call<DB> on SchemaBuilder<DB, void> {
 }
 
 extension SchemaBuilder$Create<DB> on SchemaBuilder<DB, bool> {
+  /// Returns the current schema name.
+  String get name => _name!;
+
   /// Creates a new create schema builder.
   CreateSchemaBuilder<DB> create({bool ifNotExists = false}) {
     return CreateSchemaBuilder(
       executor: _executor,
       identifier: QueryIdentifier(),
       spec: CreateSchemaSpec(
-        name: IdentifierSpec(name!),
+        name: IdentifierSpec(name),
         ifNotExists: ifNotExists,
       ),
     );
@@ -59,7 +63,7 @@ extension SchemaBuilder$Create<DB> on SchemaBuilder<DB, bool> {
       executor: _executor,
       identifier: QueryIdentifier(),
       spec: DropSchemaSpec(
-        name: IdentifierSpec(name!),
+        name: IdentifierSpec(name),
         ifExists: ifExists,
         cascade: cascade,
       ),

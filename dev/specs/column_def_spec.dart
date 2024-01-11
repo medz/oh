@@ -1,5 +1,6 @@
 import 'column_spec.dart';
 import 'constraint_spec.dart';
+import 'data_type_spec.dart';
 import 'default_value_spec.dart';
 import 'generated_spec.dart';
 import 'modifier_spec.dart';
@@ -8,7 +9,7 @@ import 'spec.dart';
 
 class ColumnDefSpec implements Spec {
   final ColumnSpec column;
-  final Spec dataType;
+  final DataTypeSpec dataType;
   final ReferencesSpec? references;
   final bool primaryKey;
   final bool autoIncrement;
@@ -39,7 +40,7 @@ class ColumnDefSpec implements Spec {
 
   ColumnDefSpec copyWith({
     ColumnSpec? column,
-    Spec? dataType,
+    DataTypeSpec? dataType,
     ReferencesSpec? references,
     bool? primaryKey,
     bool? autoIncrement,

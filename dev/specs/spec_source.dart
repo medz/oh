@@ -1,6 +1,10 @@
 import 'spec.dart';
 
-abstract interface class SpecSource<T extends Spec> {
+class SpecSource<T extends Spec> {
+  final T _spec;
+
+  const SpecSource({required T spec}) : _spec = spec;
+
   /// The spec source converts to a spec.
-  T toSpec();
+  T toSpec() => _spec;
 }

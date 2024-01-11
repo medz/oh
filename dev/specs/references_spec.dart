@@ -22,4 +22,18 @@ class ReferencesSpec implements Spec {
     this.onDelete,
     this.onUpdate,
   });
+
+  ReferencesSpec copyWith({
+    TableSpec? table,
+    Iterable<ColumnSpec>? columns,
+    OnModifyForeignAction? onDelete,
+    OnModifyForeignAction? onUpdate,
+  }) {
+    return ReferencesSpec(
+      table: table ?? this.table,
+      columns: columns ?? this.columns,
+      onDelete: onDelete ?? this.onDelete,
+      onUpdate: onUpdate ?? this.onUpdate,
+    );
+  }
 }
