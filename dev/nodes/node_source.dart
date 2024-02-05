@@ -1,5 +1,5 @@
 import 'node.dart';
 
 abstract interface class NodeSource<T extends Node> {
-  T toNode();
+  T get node;
 }

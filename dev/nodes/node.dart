@@ -1,3 +1,3 @@
 abstract interface class Node {}
 
-abstract interface class RootNode {}
+abstract interface class RootNode extends Node {}

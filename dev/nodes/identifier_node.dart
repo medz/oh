@@ -1,7 +1,7 @@
 import 'node.dart';
 
 class IdentifierNode implements Node {
-  final String name;
+  final String value;
 
-  const IdentifierNode({required this.name});
+  const IdentifierNode(this.value);
 }
