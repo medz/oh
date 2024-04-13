@@ -4,10 +4,9 @@ version: 0.0.0
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: ^3.4.0-99.0.dev
+  sdk: ^3.3.0
 
 dependencies:
-  _fe_analyzer_shared: ^67.0.0
 
 dev_dependencies:
   lints: ^2.1.0
